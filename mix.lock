@@ -1,0 +1,5 @@
+%{
+  "gen_state_machine": {:hex, :gen_state_machine, "2.0.5", "9ac15ec6e66acac994cc442dcc2c6f9796cf380ec4b08267223014be1c728a95", [:mix], [], "hexpm"},
+  "tortoise": {:hex, :tortoise, "0.9.4", "3bca5f4475f80a5bd45aab644ddb3364dd0956b67f4202dcef6ed20e045ea3a6", [:mix], [{:gen_state_machine, "~> 2.0", [hex: :gen_state_machine, repo: "hexpm", optional: false]}], "hexpm"},
+  "x509": {:hex, :x509, "0.8.0", "b286b9dbb32801f76f48bdea476304d280c64ce172ea330c23d8df7ea9e75ce6", [:mix], [], "hexpm"},
+}
