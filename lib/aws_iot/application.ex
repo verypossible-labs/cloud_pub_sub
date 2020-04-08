@@ -6,9 +6,10 @@ defmodule AWSIoT.Application do
   use Application
 
   def start(_type, _args) do
+    opts = Application.get_all_env(:aws_iot)
     children = [
       # Starts a worker by calling: AWSIoT.Worker.start_link(arg)
-      # {AWSIoT.Worker, arg}
+      {AWSIoT.Adapter, opts}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

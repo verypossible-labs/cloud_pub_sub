@@ -10,6 +10,10 @@ defmodule AWSIoT do
   @cacerts cacerts
 
   def cacerts(), do: @cacerts
+  def cacerts(signer_cert), do: [signer_cert | @cacerts]
+
+  defdelegate connected?(), to: AWSIoT.Adapter
+  defdelegate publish(topic, payload, opts), to: AWSIoT.Adapter
 
   def topic(:shadow_update, client_id), do: "$aws/things/#{client_id}/shadow/update"
   def topic(:shadow_get, client_id), do: "$aws/things/#{client_id}/shadow/get"
