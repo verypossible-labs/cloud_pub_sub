@@ -16,27 +16,22 @@ defmodule AWSIoT.Adapters.Tortoise.Handler do
     {:ok, state}
   end
 
-  #  topic filter room/+/temp
-  def handle_message(["room", room, "temp"], payload, state) do
-    # :ok = Temperature.record(room, payload)
-    {:ok, state}
-  end
-  def handle_message(topic, payload, state) do
+  def handle_message(_topic, _payload, state) do
     # unhandled message! You will crash if you subscribe to something
     # and you don't have a 'catch all' matcher; crashing on unexpected
     # messages could be a strategy though.
     {:ok, state}
   end
 
-  def subscription(status, topic_filter, state) do
+  def subscription(_status, _topic_filter, state) do
     {:ok, state}
   end
 
-  def terminate(reason, state) do
+  def terminate(_reason, _state) do
     # tortoise doesn't care about what you return from terminate/2,
     # that is in alignment with other behaviours that implement a
     # terminate-callback
-    Logger.debug "[AWS] Connection: YOU'VE BEEN TERMINATED!"
+    Logger.debug "[AWS] Connection: terminated"
     :ok
   end
 end
