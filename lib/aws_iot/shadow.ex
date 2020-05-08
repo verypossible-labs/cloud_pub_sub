@@ -1,7 +1,9 @@
 defmodule AWSIoT.Shadow do
   use GenServer
 
-  @shadow_filename "aws_iot_shadow.json"
+  alias AWSIoT.{Adapter, Router}
+
+  @filename "aws_iot_shadow.json"
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, genserver_opts(opts))
@@ -23,21 +25,23 @@ defmodule AWSIoT.Shadow do
   end
 
   def init(opts) do
-    filename = opts[:shadow_filename] || @shadow_filename
-    shadow_file = Path.join(path(opts[:shadow_path]), filename)
+    filename = opts[:filename] || @filename
+    file = Path.join(path(opts[:path]), filename)
 
     {:ok,
      %{
-       shadow_file: shadow_file,
+       file: file,
        shadow: nil
-     }, {:continue, File.exists?(shadow_file)}}
+     }, {:continue, File.exists?(file)}}
   end
 
-  def handle_continue(true, %{shadow_file: file} = s) do
+  def handle_continue(true, %{file: file} = s) do
+    subscribe()
     {:noreply, %{s | shadow: read_shadow(file)}}
   end
 
-  def handle_continue(false, %{shadow_file: file} = s) do
+  def handle_continue(false, %{file: file} = s) do
+    subscribe()
     dirname = Path.dirname(file)
 
     with :ok <- File.mkdir_p(dirname),
@@ -45,7 +49,7 @@ defmodule AWSIoT.Shadow do
       {:noreply, %{s | shadow: ""}}
     else
       _ ->
-        {:noreply, %{s | shadow_file: nil}}
+        {:noreply, %{s | file: nil}}
     end
   end
 
@@ -53,10 +57,21 @@ defmodule AWSIoT.Shadow do
     {:reply, shadow, s}
   end
 
-  def handle_call({:update_shadow, fun}, _from, %{shadow: shadow, shadow_file: file} = s) do
+  def handle_call({:update_shadow, fun}, _from, %{shadow: shadow, file: file} = s) do
     shadow = fun.(shadow)
     write_shadow(file, shadow)
     {:reply, :ok, %{s | shadow: shadow}}
+  end
+
+  def handle_info({:aws_iot, topic, payload}, s) do
+    [_, command] = String.split(topic, "shadow/", parts: 2)
+    handle_upstream(command, payload, s)
+  end
+
+  def handle_upstream("update", payload, s) do
+    shadow = Jason.decode!(payload)
+    write_shadow(s.file, shadow)
+    {:noreply, %{s | shadow: shadow}}
   end
 
   defp read_shadow(file) do
@@ -77,4 +92,19 @@ defmodule AWSIoT.Shadow do
 
   defp path(nil), do: System.tmp_dir!()
   defp path(path), do: Path.expand(path)
+
+  defp subscribe() do
+    Adapter.client_id()
+    |> topics()
+    |> Enum.each(&Router.subscribe/1)
+  end
+
+  def topics(client_id) do
+    [
+      "$aws/things/#{client_id}/shadow/update",
+      "$aws/things/#{client_id}/shadow/get",
+      "$aws/things/#{client_id}/shadow/get/accepted",
+      "$aws/things/#{client_id}/shadow/get/rejected"
+    ]
+  end
 end

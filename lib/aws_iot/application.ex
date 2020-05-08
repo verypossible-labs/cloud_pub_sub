@@ -14,6 +14,7 @@ defmodule AWSIoT.Application do
 
     children = [
       # Starts a worker by calling: AWSIoT.Worker.start_link(arg)
+      AWSIoT.Router,
       {AWSIoT.Adapter, opts},
       {AWSIoT.Shadow, shadow_opts}
     ]

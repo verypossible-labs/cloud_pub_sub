@@ -37,4 +37,13 @@ defmodule AWSIoT.Adapters.Tortoise do
     opts = if opts == [], do: [qos: 0], else: opts
     Tortoise.publish_sync(client_id, topic, payload, opts)
   end
+
+  def subscribe(topic, opts, client_id) do
+    opts = if opts == [], do: [qos: 0], else: opts
+    Tortoise.Connection.subscribe(client_id, [topic], opts)
+  end
+
+  def unsubscribe(topic, opts, client_id) do
+    Tortoise.Connection.unsubscribe(client_id, [topic], opts)
+  end
 end
