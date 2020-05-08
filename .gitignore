@@ -22,3 +22,5 @@ erl_crash.dump
 # Ignore package tarball (built via "mix hex.build").
 aws_iot-*.tar
 
+# Ignore test files
+test/tmp

@@ -5,11 +5,17 @@ defmodule AWSIoT.Adapter do
 
   @callback init(term) :: {:ok, any} | {:error, any}
   @callback connected?(adapter_state :: any) :: boolean
-  @callback publish(topic :: String.t, payload :: String.t, opts :: keyword, adapter_state :: any) :: :ok | {:error, any}
+  @callback publish(
+              topic :: String.t(),
+              payload :: String.t(),
+              opts :: keyword,
+              adapter_state :: any
+            ) :: :ok | {:error, any}
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
+
   def connected?() do
     GenServer.call(__MODULE__, :connected?)
   end
@@ -40,14 +46,19 @@ defmodule AWSIoT.Adapter do
   end
 
   def default_opts(opts) do
-    opts[:host] || raise """
-    AWS IoT requires a :host. You can find this information in the AWS console.
-    """
-    client_id = opts[:client_id] || raise """
-    AWS IoT requires a client id to be set to the same value as the serial number.
-    """
+    opts[:host] ||
+      raise """
+      AWS IoT requires a :host. You can find this information in the AWS console.
+      """
+
+    client_id =
+      opts[:client_id] ||
+        raise """
+        AWS IoT requires a client id to be set to the same value as the serial number.
+        """
 
     signer = Keyword.get(opts, :signer_cert, [])
+
     opts
     |> Keyword.put_new(:port, 443)
     |> Keyword.put_new(:server_name_indication, '*.iot.us-east-1.amazonaws.com')

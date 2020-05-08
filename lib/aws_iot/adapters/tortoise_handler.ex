@@ -12,7 +12,7 @@ defmodule AWSIoT.Adapters.Tortoise.Handler do
     # inform the rest of your system if the connection is currently
     # open or closed; tortoise should be busy reconnecting if you get
     # a `:down`
-    Logger.debug "[AWS] Connection: #{inspect status}"
+    Logger.debug("[AWS] Connection: #{inspect(status)}")
     {:ok, state}
   end
 
@@ -31,7 +31,7 @@ defmodule AWSIoT.Adapters.Tortoise.Handler do
     # tortoise doesn't care about what you return from terminate/2,
     # that is in alignment with other behaviours that implement a
     # terminate-callback
-    Logger.debug "[AWS] Connection: terminated"
+    Logger.debug("[AWS] Connection: terminated")
     :ok
   end
 end

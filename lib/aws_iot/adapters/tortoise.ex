@@ -10,7 +10,7 @@ defmodule AWSIoT.Adapters.Tortoise do
       server: {
         Tortoise.Transport.SSL,
         alpn_advertised_protocols: ["x-amzn-mqtt-ca"],
-        cacerts: (opts[:cacerts]),
+        cacerts: opts[:cacerts],
         cert: opts[:cert],
         host: opts[:host],
         key: opts[:key],
@@ -22,6 +22,7 @@ defmodule AWSIoT.Adapters.Tortoise do
       },
       subscriptions: opts[:subscriptions]
     )
+
     {:ok, client_id}
   end
 
@@ -34,6 +35,6 @@ defmodule AWSIoT.Adapters.Tortoise do
 
   def publish(topic, payload, opts, client_id) do
     opts = if opts == [], do: [qos: 0], else: opts
-    Tortoise.publish_sync(client_id,  topic,  payload, opts)
+    Tortoise.publish_sync(client_id, topic, payload, opts)
   end
 end

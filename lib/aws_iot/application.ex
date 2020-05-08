@@ -7,9 +7,15 @@ defmodule AWSIoT.Application do
 
   def start(_type, _args) do
     opts = Application.get_all_env(:aws_iot)
+
+    shadow_opts =
+      Application.get_env(:aws_iot, :shadow, [])
+      |> Keyword.put(:name, AWSIoT.Shadow)
+
     children = [
       # Starts a worker by calling: AWSIoT.Worker.start_link(arg)
-      {AWSIoT.Adapter, opts}
+      {AWSIoT.Adapter, opts},
+      {AWSIoT.Shadow, shadow_opts}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -5,6 +5,7 @@ defmodule AWSIoT.SSL do
     Enum.reduce_while(AWSIoT.cacerts(), :unknown_ca, fn aws_root_ca, unk_ca ->
       certificate = aws_root_ca |> Certificate.from_der!()
       certificate_subject = Certificate.extension(certificate, :subject_key_identifier)
+
       case find_partial_chain(certificate_subject, server_certs) do
         {:trusted_ca, _} = result -> {:halt, result}
         :unknown_ca -> {:cont, unk_ca}
@@ -20,6 +21,7 @@ defmodule AWSIoT.SSL do
     cert = Certificate.from_der!(h)
     cert_ski = Certificate.extension(cert, :subject_key_identifier)
     cert_aki = Certificate.extension(cert, :ancestor_key_identifier)
+
     if root_subject in [cert_ski, cert_aki] do
       {:trusted_ca, h}
     else
