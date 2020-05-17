@@ -1,4 +1,5 @@
 defmodule AWSIoT.Adapters.Tortoise do
+  require Logger
   @behaviour AWSIoT.Adapter
 
   def init(opts) do
@@ -10,7 +11,7 @@ defmodule AWSIoT.Adapters.Tortoise do
       server: {
         Tortoise.Transport.SSL,
         alpn_advertised_protocols: ["x-amzn-mqtt-ca"],
-        cacerts: opts[:cacerts],
+        cacerts: (opts[:cacerts]),
         cert: opts[:cert],
         host: opts[:host],
         key: opts[:key],
@@ -27,20 +28,26 @@ defmodule AWSIoT.Adapters.Tortoise do
   end
 
   def connected?(client_id) do
+
     case Tortoise.Connection.ping_sync(client_id, 5_000) do
-      {:ok, _ref} -> true
-      {:error, _error} -> false
+      {:ok, _ref} ->
+        true
+      {:error, error} ->
+        Logger.info("connected #{inspect(error)}")
+        false
     end
   end
 
   def publish(topic, payload, opts, client_id) do
     opts = if opts == [], do: [qos: 0], else: opts
+    Logger.info("publishing to #{inspect(topic)}")
     Tortoise.publish_sync(client_id, topic, payload, opts)
   end
 
   def subscribe(topic, opts, client_id) do
     opts = if opts == [], do: [qos: 0], else: opts
-    Tortoise.Connection.subscribe(client_id, [topic], opts)
+    Logger.info("Subscribing #{inspect(topic)}")
+    Tortoise.Connection.subscribe(client_id, topic, opts)
   end
 
   def unsubscribe(topic, opts, client_id) do

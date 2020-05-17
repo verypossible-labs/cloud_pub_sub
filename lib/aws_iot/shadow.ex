@@ -2,8 +2,9 @@ defmodule AWSIoT.Shadow do
   use GenServer
 
   alias AWSIoT.{Adapter, Router}
-
+  require Logger
   @filename "aws_iot_shadow.json"
+  @shadow_req_topic "$aws/things/Adapter.client_id()/shadow/get"
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, genserver_opts(opts))
@@ -17,6 +18,10 @@ defmodule AWSIoT.Shadow do
     GenServer.call(pid, {:update_shadow, fun})
   end
 
+  def get_remote_shadow(pid \\ __MODULE__) do
+    GenServer.call(pid, :request_upstream)
+  end
+
   def genserver_opts(opts) do
     case Keyword.fetch(opts, :name) do
       {:ok, name} -> [name: name]
@@ -27,11 +32,12 @@ defmodule AWSIoT.Shadow do
   def init(opts) do
     filename = opts[:filename] || @filename
     file = Path.join(path(opts[:path]), filename)
-
+    {:ok, timer_ref} = :timer.send_after(30_000, self(), :request_upstream)
     {:ok,
      %{
        file: file,
-       shadow: nil
+       shadow: nil,
+       upstream_requested?: false
      }, {:continue, File.exists?(file)}}
   end
 
@@ -55,6 +61,20 @@ defmodule AWSIoT.Shadow do
 
   def handle_call(:get_shadow, _from, %{shadow: shadow} = s) do
     {:reply, shadow, s}
+  end
+
+  def handle_info(:request_upstream ,%{upstream_requested?: false } = s) do
+    Logger.info("requesting shadow")
+    client_id = Adapter.client_id()
+    topic = "$aws/things/#{client_id}/shadow/get"
+    if Adapter.connected? do
+      Logger.info("shadow requested #{inspect(topic)}")
+      Adapter.publish(topic, <<>>, qos: 0)
+      {:noreply, %{s | upstream_requested?: true}}
+    else
+      send(self(), :request_upstream)
+      {:noreply,s}
+    end
   end
 
   def handle_call({:update_shadow, fun}, _from, %{shadow: shadow, file: file} = s) do
@@ -94,9 +114,18 @@ defmodule AWSIoT.Shadow do
   defp path(path), do: Path.expand(path)
 
   defp subscribe() do
-    Adapter.client_id()
-    |> topics()
-    |> Enum.each(&Router.subscribe/1)
+    topics = topics(Adapter.client_id())
+    with true <-  Adapter.connected? do
+      Enum.each(topics,fn (item) ->
+        Router.subscribe(item)
+        end )
+    else
+      error ->
+        :error
+    end
+
+
+
   end
 
   def topics(client_id) do

@@ -19,6 +19,7 @@ defmodule AWSIoT.Adapter do
               {:ok, state :: any} | {{:error, any}, state :: any}
 
   def start_link(opts) do
+
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
@@ -41,6 +42,9 @@ defmodule AWSIoT.Adapter do
   def client_id() do
     GenServer.call(__MODULE__, :client_id)
   end
+  def default_subscriptions() do
+    GenServer.call(__MODULE__, :default_subs)
+  end
 
   def init(opts) do
     adapter = adapter()
@@ -52,7 +56,8 @@ defmodule AWSIoT.Adapter do
          %{
            adapter: adapter,
            adapter_state: adapter_state,
-           client_id: opts[:client_id]
+           client_id: opts[:client_id],
+           default_subs: opts[:subscriptions]
          }}
 
       {:error, reason} ->
@@ -64,17 +69,38 @@ defmodule AWSIoT.Adapter do
     {:reply, s.client_id, s}
   end
 
+  def handle_call(:default_subs, _from, s) do
+    {:reply, s.default_subs, s}
+  end
+
   def handle_call(:connected?, _from, s) do
     {:reply, s.adapter.connected?(s.adapter_state), s}
   end
 
   def handle_call({:publish, topic, payload, opts}, _from, s) do
-    {reply, adapter_state} = s.adapter.publish(topic, payload, opts, s.adapter_state)
-    {:reply, reply, %{s | adapter_state: adapter_state}}
+    reply = s.adapter.publish(topic, payload, opts, s.adapter_state)
+    {:reply, reply, s}
   end
 
   def handle_call({:subscribe, topic, opts}, _from, s) do
-    {reply, adapter_state} = s.adapter.subscribe(topic, opts, s.adapter_state)
+    {reply , adapter_state} = {:ok, s.adapter_state}
+    Logger.info("[adapter] :subscribe #{inspect(s.default_subs)} ")
+    present =
+      Enum.any?(s.default_subs, fn ({default_topic, _}) ->
+        Logger.info("[adapter] :subscribe #{inspect(default_topic)} looking for #{inspect(topic)} ")
+        case default_topic do
+          ^topic ->
+            Logger.info("[adapter] :subscribe  #{inspect(topic)} is present")
+            true
+          _ -> false
+        end
+      end)
+
+    if present == false do
+      Logger.info("[adapter] :subscribe #{inspect(topic)} not present")
+      {reply, adapter_state} = s.adapter.subscribe(topic, opts, s.adapter_state)
+    end
+
     {:reply, reply, %{s | adapter_state: adapter_state}}
   end
 
@@ -85,6 +111,11 @@ defmodule AWSIoT.Adapter do
 
   def handle_info({:connection_status, status}, s) do
     Logger.debug("[AWS] Connection: #{inspect(status)}")
+    {:noreply, s}
+  end
+
+  def handle_info(result, s) do
+    Logger.debug("[adapter] Connection: #{inspect(result)}")
     {:noreply, s}
   end
 
@@ -105,6 +136,13 @@ defmodule AWSIoT.Adapter do
     |> Keyword.put_new(:port, 443)
     |> Keyword.put_new(:server_name_indication, '*.iot.us-east-1.amazonaws.com')
     |> Keyword.put_new(:cacerts, [signer | AWSIoT.cacerts()])
+    |> Keyword.put_new(:subscriptions, [
+      {"$aws/things/U737258/shadow/get/accepted", 1},
+      {"$aws/things/U737258/shadow/get/rejected", 1},
+      {"$aws/things/U737258/shadow/update", 1},
+      {"$aws/things/U737258/shadow/get", 1}
+
+    ])
   end
 
   defp adapter do

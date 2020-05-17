@@ -1,6 +1,7 @@
 defmodule AWSIoT.Adapters.Tortoise.Handler do
   use Tortoise.Handler
-
+  alias AWSIoT.Adapter
+  alias AWSIoT.Router
   require Logger
 
   def init(args) do
@@ -12,6 +13,7 @@ defmodule AWSIoT.Adapters.Tortoise.Handler do
     # inform the rest of your system if the connection is currently
     # open or closed; tortoise should be busy reconnecting if you get
     # a `:down`
+    Logger.debug("[hander] Connection: #{inspect(status)}")
     send(Adapter, {:connection_status, status})
     {:ok, state}
   end
@@ -20,11 +22,13 @@ defmodule AWSIoT.Adapters.Tortoise.Handler do
     # unhandled message! You will crash if you subscribe to something
     # and you don't have a 'catch all' matcher; crashing on unexpected
     # messages could be a strategy though.
+    Logger.debug("[handler] handle_message: #{inspect(payload)} #{inspect(state) }")
     send(Router, {:message, topic, payload})
     {:ok, state}
   end
 
-  def subscription(_status, _topic_filter, state) do
+  def subscription(status, topic_filter, state) do
+    Logger.debug("[handler] subscription: #{inspect(status)} #{inspect(topic_filter)} #{inspect(state)}")
     {:ok, state}
   end
 
@@ -32,6 +36,7 @@ defmodule AWSIoT.Adapters.Tortoise.Handler do
     # tortoise doesn't care about what you return from terminate/2,
     # that is in alignment with other behaviours that implement a
     # terminate-callback
+    Logger.debug("[handler] terminate")
     send(Router, {:connection_status, :terminated})
     :ok
   end
