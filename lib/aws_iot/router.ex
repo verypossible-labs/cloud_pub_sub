@@ -72,8 +72,10 @@ defmodule AWSIoT.Router do
   end
 
   defp broadcast_messages(topic, payload, subscribers) do
+    Logger.debug("[#{inspect(__MODULE__)}] broadcast topic #{inspect(topic)} subscribers#{inspect(subscribers)}")
     Enum.each(subscribers, fn
       {pid, _, ^topic} ->
+        Logger.debug("[#{inspect(__MODULE__)}] broadcast to #{inspect(pid)}")
         send(pid, {:aws_iot, topic, payload})
 
       _ ->

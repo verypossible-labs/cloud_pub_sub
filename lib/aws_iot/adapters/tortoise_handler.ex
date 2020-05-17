@@ -18,12 +18,13 @@ defmodule AWSIoT.Adapters.Tortoise.Handler do
     {:ok, state}
   end
 
-  def handle_message(topic, payload, state) do
+  def handle_message(topic, payload, state) when is_list(topic) do
     # unhandled message! You will crash if you subscribe to something
     # and you don't have a 'catch all' matcher; crashing on unexpected
     # messages could be a strategy though.
-    Logger.debug("[handler] handle_message: #{inspect(payload)} #{inspect(state) }")
-    send(Router, {:message, topic, payload})
+
+    Logger.debug("[handler] handle_message: payload: #{inspect(payload)} topic: #{inspect(topic)} state: #{inspect(state) }")
+    send(Router, {:message, Enum.join(topic,"/"), payload})
     {:ok, state}
   end
 

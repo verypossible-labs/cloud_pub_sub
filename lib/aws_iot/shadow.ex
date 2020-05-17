@@ -84,14 +84,22 @@ defmodule AWSIoT.Shadow do
   end
 
   def handle_info({:aws_iot, topic, payload}, s) do
+    Logger.debug("[shadow] aws_iot topic:#{inspect(topic)} payload:#{inspect(payload)} ")
     [_, command] = String.split(topic, "shadow/", parts: 2)
+    Logger.debug("[#{inspect(__MODULE__)}] aws_iot command:#{inspect(command)} payload:#{inspect(payload)} ")
     handle_upstream(command, payload, s)
   end
 
-  def handle_upstream("update", payload, s) do
+  def handle_upstream("get/accepted", payload, s) do
     shadow = Jason.decode!(payload)
     write_shadow(s.file, shadow)
+    Logger.debug("[#{inspect(__MODULE__)}] handle_upstream shadow:#{inspect(shadow)} ")
     {:noreply, %{s | shadow: shadow}}
+  end
+
+  def handle_upstream("get", payload, s) do
+    :noop
+    {:noreply, s }
   end
 
   defp read_shadow(file) do
