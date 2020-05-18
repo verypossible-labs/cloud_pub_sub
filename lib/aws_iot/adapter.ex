@@ -19,7 +19,6 @@ defmodule AWSIoT.Adapter do
               {:ok, state :: any} | {{:error, any}, state :: any}
 
   def start_link(opts) do
-
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
@@ -42,6 +41,7 @@ defmodule AWSIoT.Adapter do
   def client_id() do
     GenServer.call(__MODULE__, :client_id)
   end
+
   def default_subscriptions() do
     GenServer.call(__MODULE__, :default_subs)
   end
@@ -83,16 +83,22 @@ defmodule AWSIoT.Adapter do
   end
 
   def handle_call({:subscribe, topic, opts}, _from, s) do
-    {reply , adapter_state} = {:ok, s.adapter_state}
+    {reply, adapter_state} = {:ok, s.adapter_state}
     Logger.info("[adapter] :subscribe #{inspect(s.default_subs)} ")
+
     present =
-      Enum.any?(s.default_subs, fn ({default_topic, _}) ->
-        Logger.info("[adapter] :subscribe #{inspect(default_topic)} looking for #{inspect(topic)} ")
+      Enum.any?(s.default_subs, fn {default_topic, _} ->
+        Logger.info(
+          "[adapter] :subscribe #{inspect(default_topic)} looking for #{inspect(topic)} "
+        )
+
         case default_topic do
           ^topic ->
             Logger.info("[adapter] :subscribe  #{inspect(topic)} is present")
             true
-          _ -> false
+
+          _ ->
+            false
         end
       end)
 
@@ -141,7 +147,6 @@ defmodule AWSIoT.Adapter do
       {"$aws/things/U737258/shadow/get/rejected", 1},
       {"$aws/things/U737258/shadow/update", 1},
       {"$aws/things/U737258/shadow/get", 1}
-
     ])
   end
 

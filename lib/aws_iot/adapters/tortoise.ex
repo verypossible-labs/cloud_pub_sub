@@ -11,7 +11,7 @@ defmodule AWSIoT.Adapters.Tortoise do
       server: {
         Tortoise.Transport.SSL,
         alpn_advertised_protocols: ["x-amzn-mqtt-ca"],
-        cacerts: (opts[:cacerts]),
+        cacerts: opts[:cacerts],
         cert: opts[:cert],
         host: opts[:host],
         key: opts[:key],
@@ -28,10 +28,10 @@ defmodule AWSIoT.Adapters.Tortoise do
   end
 
   def connected?(client_id) do
-
     case Tortoise.Connection.ping_sync(client_id, 5_000) do
       {:ok, _ref} ->
         true
+
       {:error, error} ->
         Logger.info("connected #{inspect(error)}")
         false
