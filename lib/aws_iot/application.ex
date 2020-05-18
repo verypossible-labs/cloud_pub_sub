@@ -11,6 +11,7 @@ defmodule AWSIoT.Application do
     shadow_opts =
       Application.get_env(:aws_iot, :shadow, [])
       |> Keyword.put(:name, AWSIoT.Shadow)
+      |> Keyword.put(:path, "/root/")
 
     children = [
       # Starts a worker by calling: AWSIoT.Worker.start_link(arg)

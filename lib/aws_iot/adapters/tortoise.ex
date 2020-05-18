@@ -40,7 +40,6 @@ defmodule AWSIoT.Adapters.Tortoise do
 
   def publish(topic, payload, opts, client_id) do
     opts = if opts == [], do: [qos: 0], else: opts
-    Logger.info("publishing to #{inspect(topic)}")
     Tortoise.publish_sync(client_id, topic, payload, opts)
   end
 

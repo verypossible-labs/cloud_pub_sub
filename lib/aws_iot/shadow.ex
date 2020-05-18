@@ -32,6 +32,7 @@ defmodule AWSIoT.Shadow do
   def init(opts) do
     filename = opts[:filename] || @filename
     file = Path.join(path(opts[:path]), filename)
+    Logger.debug("#{inspect(__MODULE__)} file:#{inspect(file)} opts:#{inspect(opts)}")
     {:ok, timer_ref} = :timer.send_after(30_000, self(), :request_upstream)
     {:ok,
      %{
@@ -42,14 +43,14 @@ defmodule AWSIoT.Shadow do
   end
 
   def handle_continue(true, %{file: file} = s) do
-    subscribe()
+    Logger.debug("#{inspect(__MODULE__)} file:#{inspect(file)} content:#{inspect(read_shadow(file))}}")
     {:noreply, %{s | shadow: read_shadow(file)}}
   end
 
   def handle_continue(false, %{file: file} = s) do
-    subscribe()
-    dirname = Path.dirname(file)
 
+    dirname = Path.dirname(file)
+    Logger.debug("#{inspect(__MODULE__)} file:#{inspect(file)} ")
     with :ok <- File.mkdir_p(dirname),
          :ok <- write_shadow(file, "") do
       {:noreply, %{s | shadow: ""}}
@@ -62,8 +63,23 @@ defmodule AWSIoT.Shadow do
   def handle_call(:get_shadow, _from, %{shadow: shadow} = s) do
     {:reply, shadow, s}
   end
+  def handle_call(:request_upstream , s) do
+    subscribe()
+    Logger.info("requesting shadow")
+    client_id = Adapter.client_id()
+    topic = "$aws/things/#{client_id}/shadow/get"
+    if Adapter.connected? do
+      Logger.info("shadow requested #{inspect(topic)}")
+      Adapter.publish(topic, <<>>, qos: 0)
+      {:reply, :ok, %{s | upstream_requested?: true}}
+    else
+      {:reply,:not_connected, s}
+    end
+  end
+
 
   def handle_info(:request_upstream ,%{upstream_requested?: false } = s) do
+    subscribe()
     Logger.info("requesting shadow")
     client_id = Adapter.client_id()
     topic = "$aws/things/#{client_id}/shadow/get"
@@ -131,11 +147,7 @@ defmodule AWSIoT.Shadow do
       error ->
         :error
     end
-
-
-
   end
-
   def topics(client_id) do
     [
       "$aws/things/#{client_id}/shadow/update",
