@@ -68,7 +68,7 @@ defmodule AWSIoT.Shadow do
     {:reply, shadow, s}
   end
 
-  def handle_call(:request_upstream, s) do
+  def handle_call(:request_upstream, _from, s) do
     subscribe()
     client_id = Adapter.client_id()
     topic = "$aws/things/#{client_id}/shadow/get"
