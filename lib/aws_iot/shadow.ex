@@ -70,7 +70,6 @@ defmodule AWSIoT.Shadow do
 
   def handle_call(:request_upstream, s) do
     subscribe()
-    Logger.info("requesting shadow")
     client_id = Adapter.client_id()
     topic = "$aws/things/#{client_id}/shadow/get"
 
@@ -90,7 +89,6 @@ defmodule AWSIoT.Shadow do
     topic = "$aws/things/#{client_id}/shadow/get"
 
     if Adapter.connected?() do
-      Logger.info("shadow requested #{inspect(topic)}")
       Adapter.publish(topic, <<>>, qos: 0)
       {:noreply, %{s | upstream_requested?: true}}
     else
@@ -109,23 +107,18 @@ defmodule AWSIoT.Shadow do
     Logger.debug("[shadow] aws_iot topic:#{inspect(topic)} payload:#{inspect(payload)} ")
     [_, command] = String.split(topic, "shadow/", parts: 2)
 
-    Logger.debug(
-      "[#{inspect(__MODULE__)}] aws_iot command:#{inspect(command)} payload:#{inspect(payload)} "
-    )
-
     handle_upstream(command, payload, s)
-  end
-
-  def handle_upstream("get/accepted", payload, s) do
-    shadow = Jason.decode!(payload)
-    write_shadow(s.file, shadow)
-    Logger.debug("[#{inspect(__MODULE__)}] handle_upstream shadow:#{inspect(shadow)} ")
-    {:noreply, %{s | shadow: shadow}}
   end
 
   def handle_upstream("get", payload, s) do
     :noop
     {:noreply, s}
+  end
+
+  def handle_upstream(_cmd, payload, s) do
+    shadow = Jason.decode!(payload)
+    write_shadow(s.file, shadow)
+    {:noreply, %{s | shadow: shadow}}
   end
 
   defp read_shadow(file) do
@@ -165,7 +158,8 @@ defmodule AWSIoT.Shadow do
       "$aws/things/#{client_id}/shadow/update",
       "$aws/things/#{client_id}/shadow/get",
       "$aws/things/#{client_id}/shadow/get/accepted",
-      "$aws/things/#{client_id}/shadow/get/rejected"
+      "$aws/things/#{client_id}/shadow/get/rejected",
+      "$aws/things/#{client_id}/shadow/update/accepted",
     ]
   end
 end

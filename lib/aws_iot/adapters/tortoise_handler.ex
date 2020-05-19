@@ -23,21 +23,11 @@ defmodule AWSIoT.Adapters.Tortoise.Handler do
     # and you don't have a 'catch all' matcher; crashing on unexpected
     # messages could be a strategy though.
 
-    Logger.debug(
-      "[handler] handle_message: payload: #{inspect(payload)} topic: #{inspect(topic)} state: #{
-        inspect(state)
-      }"
-    )
-
     send(Router, {:message, Enum.join(topic, "/"), payload})
     {:ok, state}
   end
 
   def subscription(status, topic_filter, state) do
-    Logger.debug(
-      "[handler] subscription: #{inspect(status)} #{inspect(topic_filter)} #{inspect(state)}"
-    )
-
     {:ok, state}
   end
 

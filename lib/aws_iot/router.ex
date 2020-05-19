@@ -1,6 +1,5 @@
 defmodule AWSIoT.Router do
   use GenServer
-  require Logger
   alias AWSIoT.Adapter
 
   def start_link(opts) do
@@ -23,13 +22,10 @@ defmodule AWSIoT.Router do
   end
 
   def handle_call({:subscribe, topic}, {pid, _ref}, s) do
-    Logger.info("[router] :subscribe #{inspect(s.subscribers)} ")
-
     subscribers =
       case Enum.any?(s.subscribers, fn subscriber ->
              case subscriber do
                {^pid, _, ^topic} ->
-                 Logger.info("[router] :subscribe mon_ref#{inspect(subscriber)} ")
                  true
 
                _ ->
@@ -41,12 +37,9 @@ defmodule AWSIoT.Router do
 
         false ->
           mon_ref = Process.monitor(pid)
-          Logger.info("[router] :subscribe mon_ref#{inspect(mon_ref)} ")
           Adapter.subscribe(topic)
           [{pid, mon_ref, topic} | s.subscribers]
       end
-
-    Logger.info("[router] :subscribe #{inspect(pid)} #{inspect(subscribers)} ")
 
     {:reply, :ok, %{s | subscribers: subscribers}}
   end
@@ -74,15 +67,8 @@ defmodule AWSIoT.Router do
   end
 
   defp broadcast_messages(topic, payload, subscribers) do
-    Logger.debug(
-      "[#{inspect(__MODULE__)}] broadcast topic #{inspect(topic)} subscribers#{
-        inspect(subscribers)
-      }"
-    )
-
     Enum.each(subscribers, fn
       {pid, _, ^topic} ->
-        Logger.debug("[#{inspect(__MODULE__)}] broadcast to #{inspect(pid)}")
         send(pid, {:aws_iot, topic, payload})
 
       _ ->
