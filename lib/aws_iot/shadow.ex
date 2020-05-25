@@ -4,7 +4,7 @@ defmodule AWSIoT.Shadow do
   alias AWSIoT.{Adapter, Router}
   require Logger
   @filename "aws_iot_shadow.json"
-  @shadow_req_topic "$aws/things/Adapter.client_id()/shadow/get"
+
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, genserver_opts(opts))
@@ -17,6 +17,11 @@ defmodule AWSIoT.Shadow do
   def update_shadow(pid \\ __MODULE__, fun) do
     GenServer.call(pid, {:update_shadow, fun})
   end
+
+  def update_shadow_reported(pid \\ __MODULE__,  fun) do
+    GenServer.call(pid, {:update_shadow, :reported, fun})
+  end
+
 
   def get_remote_shadow(pid \\ __MODULE__) do
     GenServer.call(pid, :request_upstream)
@@ -67,6 +72,21 @@ defmodule AWSIoT.Shadow do
   def handle_call(:get_shadow, _from, %{shadow: shadow} = s) do
     {:reply, shadow, s}
   end
+  def handle_call({:update_shadow, :reported, fun}, _from, %{shadow: shadow, file: file} = s) do
+    client_id = Adapter.client_id()
+
+    Logger.debug("#{inspect(__MODULE__)} #{inspect(shadow)}")
+    reported =
+      with {:ok, reported} <- get_reported_object(shadow) do
+        fun.(reported)
+      else
+        _ ->
+        fun.(%{})
+      end
+
+    {:ok, timer_ref} = :timer.send_after(30_000, self(), :send_reported)
+    {:reply, :ok, Map.put(s, :shadow_reported, reported)}
+  end
 
   def handle_call(:request_upstream, _from, s) do
     subscribe()
@@ -97,7 +117,18 @@ defmodule AWSIoT.Shadow do
     end
   end
 
+  def handle_info(:send_reported,s) do
+    client_id = Adapter.client_id()
+    topic = "$aws/things/#{client_id}/shadow/update"
+    Logger.debug("#{inspect(__MODULE__)} send_reported #{inspect(byte_size(Jason.encode!(s.shadow_reported)))}, topic:#{inspect(topic)}}")
+
+    result = Adapter.publish(topic, Jason.encode!(s.shadow_reported), qos: 0)
+    Logger.debug("#{inspect(__MODULE__)} send_reported #{inspect(result)}")
+    {:noreply, s}
+  end
+
   def handle_call({:update_shadow, fun}, _from, %{shadow: shadow, file: file} = s) do
+    Logger.debug("#{inspect(__MODULE__)} #{inspect(shadow)}")
     shadow = fun.(shadow)
     write_shadow(file, shadow)
     {:reply, :ok, %{s | shadow: shadow}}
@@ -152,6 +183,18 @@ defmodule AWSIoT.Shadow do
         :error
     end
   end
+
+
+  def get_reported_object(%{"state" => %{"reported" => reported}}) do
+    {:ok, reported}
+  end
+  def get_reported_object("") do
+     {:ok, %{}}
+  end
+  def get_reported_object(_x) do
+    {:error, :no_match}
+  end
+
 
   def topics(client_id) do
     [

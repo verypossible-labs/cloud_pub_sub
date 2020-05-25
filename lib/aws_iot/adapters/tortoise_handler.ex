@@ -13,7 +13,7 @@ defmodule AWSIoT.Adapters.Tortoise.Handler do
     # inform the rest of your system if the connection is currently
     # open or closed; tortoise should be busy reconnecting if you get
     # a `:down`
-    Logger.debug("[hander] Connection: #{inspect(status)}")
+    Logger.debug("[handler] Connection: #{inspect(status)}")
     send(Adapter, {:connection_status, status})
     {:ok, state}
   end

@@ -134,9 +134,9 @@ defmodule AWSIoT.Adapter do
     |> Keyword.put_new(:subscriptions, [
       {"$aws/things/#{opts[:client_id]}/shadow/get/accepted", 1},
       {"$aws/things/#{opts[:client_id]}/shadow/get/rejected", 1},
-      {"$aws/things/#{opts[:client_id]}/shadow/update", 1},
       {"$aws/things/#{opts[:client_id]}/shadow/get", 1},
-      {"$aws/things/#{opts[:client_id]}/shadow/update/accepted", 1}
+      {"$aws/things/#{opts[:client_id]}/shadow/update/accepted", 1},
+      {"$aws/things/#{opts[:client_id]}/shadow/update/rejected", 1}
     ])
   end
 
