@@ -1,7 +1,7 @@
 defmodule AWSIoT.Adapter do
   use GenServer
 
-  @default_adapter AWSIoT.Adapters.Tortoise
+  @default_adapter AWSIoT.Adapters.Tortoise.SSL
 
   @callback init(term) :: {:ok, any} | {:error, any}
   @callback connected?(adapter_state :: any) :: boolean
