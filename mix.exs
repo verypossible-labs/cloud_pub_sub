@@ -14,7 +14,7 @@ defmodule AWSIoT.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :ssl],
       mod: {AWSIoT.Application, []}
     ]
   end
@@ -23,7 +23,10 @@ defmodule AWSIoT.MixProject do
   defp deps do
     [
       {:tortoise, "~> 0.9"},
-      {:x509, "~> 0.8"}
+      {:websocket_client, "~> 1.4"},
+      {:x509, "~> 0.8"},
+      {:ex_aws, "~> 2.1"},
+      {:hackney, "~> 1.9"},
     ]
   end
 end
