@@ -3,7 +3,6 @@ defmodule AWSIoTTest do
   doctest AWSIoT
 
   alias AWSIoT.Shadow
-
   # test "connected?" do
   #   assert AWSIoT.connected?() == false
   #   set_connected(true)
