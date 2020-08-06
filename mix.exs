@@ -1,9 +1,9 @@
-defmodule AWSIoT.MixProject do
+defmodule CloudPubSub.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :aws_iot,
+      app: :cloud_pub_sub,
       version: "0.1.0",
       elixir: "~> 1.9",
       start_permanent: Mix.env() == :prod,

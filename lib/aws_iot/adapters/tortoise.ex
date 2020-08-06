@@ -1,9 +1,9 @@
-defmodule AWSIoT.Adapters.Tortoise do
+defmodule CloudPubSub.Adapters.Tortoise do
   defmacro __using__(_opts) do
     quote do
-      @behaviour AWSIoT.Adapter
+      @behaviour CloudPubSub.Adapter
 
-      @impl AWSIoT.Adapter
+      @impl CloudPubSub.Adapter
       def connected?(adapter_state) do
         case Tortoise.Connection.ping_sync(adapter_state.client_id, 5_000) do
           {:ok, _ref} -> {true, adapter_state}
@@ -11,13 +11,13 @@ defmodule AWSIoT.Adapters.Tortoise do
         end
       end
 
-      @impl AWSIoT.Adapter
+      @impl CloudPubSub.Adapter
       def publish(topic, payload, opts, adapter_state) do
         opts = if opts == [], do: [qos: 0], else: opts
         {Tortoise.publish_sync(adapter_state.client_id, topic, payload, opts), adapter_state}
       end
 
-      @impl AWSIoT.Adapter
+      @impl CloudPubSub.Adapter
       def subscribe(topic, opts, adapter_state) do
         opts = if opts == [], do: [qos: 0], else: opts
         {Tortoise.Connection.subscribe_sync(adapter_state.client_id, topic, opts), adapter_state}
@@ -36,7 +36,7 @@ defmodule AWSIoT.Adapters.Tortoise do
 
     Tortoise.Connection.start_link(
       client_id: client_id,
-      handler: {AWSIoT.Adapters.Tortoise.Handler, []},
+      handler: {CloudPubSub.Adapters.Tortoise.Handler, []},
       server: server,
       subscriptions: subscriptions
     )
