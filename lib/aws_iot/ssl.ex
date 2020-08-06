@@ -1,8 +1,8 @@
-defmodule AWSIoT.SSL do
+defmodule CloudPubSub.SSL do
   alias X509.Certificate
 
   def partial_chain(server_certs) do
-    Enum.reduce_while(AWSIoT.cacerts(), :unknown_ca, fn aws_root_ca, unk_ca ->
+    Enum.reduce_while(CloudPubSub.cacerts(), :unknown_ca, fn aws_root_ca, unk_ca ->
       certificate = aws_root_ca |> Certificate.from_der!()
       certificate_subject = Certificate.extension(certificate, :subject_key_identifier)
       case find_partial_chain(certificate_subject, server_certs) do

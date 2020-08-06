@@ -1,4 +1,4 @@
-defmodule AWSIoT do
+defmodule CloudPubSub do
   @moduledoc """
   An abstraction over AWS IoT Core.
   """
@@ -17,10 +17,10 @@ defmodule AWSIoT do
   """
   def cacerts(), do: @cacerts
 
-  defdelegate connected?(), to: AWSIoT.Adapter
+  defdelegate connected?(), to: CloudPubSub.Adapter
 
-  defdelegate publish(topic, payload, opts), to: AWSIoT.Adapter
-  defdelegate subscribe(topic, opts \\ []), to: AWSIoT.Adapter
+  defdelegate publish(topic, payload, opts), to: CloudPubSub.Adapter
+  defdelegate subscribe(topic, opts \\ []), to: CloudPubSub.Adapter
 
   @doc """
   Return the official AWS topic associated with the `short_name` using `client_id`.

@@ -1,4 +1,4 @@
-defmodule AWSIoT.Adapter do
+defmodule CloudPubSub.Adapter do
   @moduledoc """
   A GenServer that manages interaction with an AWS IoT Core implementation.
   """
@@ -9,7 +9,7 @@ defmodule AWSIoT.Adapter do
   @callback publish(topic, payload, publish_opts(), adapter_state()) ::
               {publish_opts(), adapter_state()}
   @callback subscribe(topic, subscribe_opts(), adapter_state()) :: {boolean(), adapter_state()}
-  @default_adapter AWSIoT.Adapters.Tortoise.SSL
+  @default_adapter CloudPubSub.Adapters.Tortoise.SSL
   @type adapter_state() :: any()
   @type payload() :: String.t()
   @type publish_opts() :: keyword()
@@ -94,7 +94,7 @@ defmodule AWSIoT.Adapter do
   """
   def subscribe(topic, qos), do: GenServer.call(__MODULE__, {:subscribe, topic, qos})
 
-  defp adapter, do: Application.get_env(:aws_iot, :adapter, @default_adapter)
+  defp adapter, do: Application.get_env(:cloud_pub_sub, :adapter, @default_adapter)
 
   defp default_opts(opts) do
     opts[:host] || raise "AWS IoT requires a :host."
@@ -103,7 +103,7 @@ defmodule AWSIoT.Adapter do
     opts
     |> Keyword.put_new(:port, 443)
     |> Keyword.put_new(:server_name_indication, "*.iot.us-east-1.amazonaws.com")
-    |> Keyword.put_new(:aws_ca_certs, AWSIoT.cacerts())
+    |> Keyword.put_new(:aws_ca_certs, CloudPubSub.cacerts())
     |> Keyword.put_new(:subscriptions, [])
   end
 end

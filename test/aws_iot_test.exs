@@ -1,5 +1,5 @@
-defmodule AWSIoTTest do
+defmodule CloudPubSubTest do
   use ExUnit.Case
-  doctest AWSIoT
+  doctest CloudPubSub
 
 end

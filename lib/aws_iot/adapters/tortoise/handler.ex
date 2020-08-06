@@ -1,4 +1,4 @@
-defmodule AWSIoT.Adapters.Tortoise.Handler do
+defmodule CloudPubSub.Adapters.Tortoise.Handler do
   use Tortoise.Handler
 
   require Logger

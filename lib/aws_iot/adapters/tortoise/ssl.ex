@@ -1,5 +1,5 @@
-defmodule AWSIoT.Adapters.Tortoise.SSL do
-  use AWSIoT.Adapters.Tortoise
+defmodule CloudPubSub.Adapters.Tortoise.SSL do
+  use CloudPubSub.Adapters.Tortoise
 
   def init(opts) do
     opts[:device_cert] || raise "AWS IoT requires a :device_cert."
@@ -14,14 +14,14 @@ defmodule AWSIoT.Adapters.Tortoise.SSL do
          cert: opts[:device_cert],
          host: opts[:host],
          key: opts[:device_key],
-         partial_chain: &AWSIoT.SSL.partial_chain/1,
+         partial_chain: &CloudPubSub.SSL.partial_chain/1,
          port: opts[:port],
          server_name_indication: opts[:server_name_indication],
          verify: :verify_peer,
          versions: [:"tlsv1.2"]
        ]}
 
-    AWSIoT.Adapters.Tortoise.tortoise_connect(opts[:client_id], opts[:subscriptions], server)
+    CloudPubSub.Adapters.Tortoise.tortoise_connect(opts[:client_id], opts[:subscriptions], server)
     {:ok, %{client_id: opts[:client_id]}}
   end
 end
