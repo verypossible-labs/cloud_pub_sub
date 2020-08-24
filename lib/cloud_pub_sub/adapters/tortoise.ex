@@ -25,20 +25,39 @@ defmodule CloudPubSub.Adapters.Tortoise do
     end
   end
 
-  def tortoise_connect(client_id, subscriptions, {server_module, server_opts}) do
-    server =
-      {server_module,
-       Keyword.update!(server_opts, :server_name_indication, &String.to_charlist/1)}
+  def tortoise_connect(opts) do
+    {server_module, server_opts} = opts.server
 
-    IO.inspect(client_id)
-    IO.inspect(server)
-    IO.inspect(subscriptions)
+    server_opts =
+      case Keyword.fetch(server_opts, :server_name_indication) do
+        {:ok, sni} when is_binary(sni) ->
+          Keyword.update!(server_opts, :server_name_indication, &String.to_charlist/1)
 
-    Tortoise.Connection.start_link(
-      client_id: client_id,
+        :error ->
+          server_opts
+      end
+
+    server = {server_module, server_opts}
+
+    connection_opts = [
+      client_id: opts.client_id,
       handler: {CloudPubSub.Adapters.Tortoise.Handler, []},
       server: server,
-      subscriptions: subscriptions
-    )
+      subscriptions: opts.subscriptions
+    ]
+
+    connection_opts =
+      case opts[:cloud_provider] do
+        :aws ->
+          connection_opts
+
+        :gcp ->
+          Keyword.merge(
+            [password: opts.password],
+            connection_opts
+          )
+      end
+
+    Tortoise.Connection.start_link(connection_opts)
   end
 end

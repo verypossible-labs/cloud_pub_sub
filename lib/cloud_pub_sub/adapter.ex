@@ -25,7 +25,7 @@ defmodule CloudPubSub.Adapter do
           signer_cert: String.t(),
           port: integer(),
           server_name_indication: String.t(),
-          aws_ca_certs: [String.t()],
+          ca_certs: [String.t()],
           signer_cert: String.t()
         ]
   @doc """
@@ -75,7 +75,7 @@ defmodule CloudPubSub.Adapter do
 
   ## Options
 
-  `:aws_ca_certs` - `String.t()`. Optional. Defaults to all four ATS CAs. The AWS CA certificates
+  `:ca_certs` - `String.t()`. Optional. Defaults to all four ATS CAs. The AWS CA certificates
     to include during authentication.
   `:client_id` - `String.t()`. Required. The MQTT client ID to connect with.
   `:device_cert` - `String.t()`. Required. The client certificate.
@@ -97,13 +97,13 @@ defmodule CloudPubSub.Adapter do
   defp adapter, do: Application.get_env(:cloud_pub_sub, :adapter, @default_adapter)
 
   defp default_opts(opts) do
-    opts[:host] || raise "AWS IoT requires a :host."
-    opts[:client_id] || raise "AWS IoT requires a :client_id."
+    opts[:cloud_provider] || raise ":cloud_provider is required."
+    opts[:host] || raise ":host is required."
+    opts[:client_id] || raise ":client_id is required"
 
     opts
     |> Keyword.put_new(:port, 443)
-    |> Keyword.put_new(:server_name_indication, "*.iot.us-east-1.amazonaws.com")
-    |> Keyword.put_new(:aws_ca_certs, CloudPubSub.cacerts())
+    |> Keyword.put_new(:ca_certs, CloudPubSub.ca_certs(opts[:cloud_provider]))
     |> Keyword.put_new(:subscriptions, [])
   end
 end
