@@ -16,6 +16,9 @@ defmodule CloudPubSub do
                 |> Stream.map(&Path.join([:code.priv_dir(:cloud_pub_sub), "ca_certs", "gcp", &1]))
                 |> Stream.map(&Path.expand/1)
                 |> Stream.map(&File.read!/1)
+                |> Stream.flat_map(&String.split(&1, "-----END CERTIFICATE-----"))
+                |> Stream.map(&"#{&1}-----END CERTIFICATE-----")
+                |> Enum.slice(0..-2)
                 |> Stream.map(&X509.Certificate.from_pem!/1)
                 |> Enum.map(&X509.Certificate.to_der/1)
 
