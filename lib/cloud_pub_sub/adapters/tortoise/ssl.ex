@@ -18,7 +18,9 @@ defmodule CloudPubSub.Adapters.Tortoise.SSL do
       partial_chain: &CloudPubSub.SSL.partial_chain(opts[:cloud_provider], &1),
       port: opts[:port],
       verify: :verify_peer,
-      versions: [:"tlsv1.2"]
+      versions: [:"tlsv1.2"],
+      cert: opts[:device_cert],
+      key: opts[:device_key]
     ]
 
     server_opts =
