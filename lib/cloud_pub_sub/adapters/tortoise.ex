@@ -38,10 +38,11 @@ defmodule CloudPubSub.Adapters.Tortoise do
       end
 
     server = {server_module, server_opts}
+    handler = opts[:handler] || CloudPubSub.Adapters.Tortoise.Handler
 
     connection_opts = [
       client_id: opts.client_id,
-      handler: {CloudPubSub.Adapters.Tortoise.Handler, []},
+      handler: {handler, []},
       server: server,
       subscriptions: opts.subscriptions
     ]
