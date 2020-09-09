@@ -80,6 +80,7 @@ defmodule CloudPubSub.Adapter do
   `:client_id` - `String.t()`. Required. The MQTT client ID to connect with.
   `:device_cert` - `String.t()`. Required. The client certificate.
   `:device_key` - `String.t()`. Required. The client key.
+  `:handler` - `module()`. Optional. A subscription handler module.
   `:host` - `String.t()`. Required. The MQTT endpoint to connect to. Typically your ATS endpoint.
   `:port` - `integer()`. Optional. Defaults to `443`. The MQTT port to connect to.
   `:server_name_indication` - `String.t()`. Optional. Defaults to `*.iot.us-east-1.amazonaws.com`.

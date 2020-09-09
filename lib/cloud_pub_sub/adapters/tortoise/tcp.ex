@@ -12,6 +12,7 @@ defmodule CloudPubSub.Adapters.Tortoise.TCP do
     connection_opts = %{
       cloud_provider: opts[:cloud_provider],
       client_id: opts[:client_id],
+      handler: opts[:handler],
       subscriptions: opts[:subscriptions],
       server: server
     }
