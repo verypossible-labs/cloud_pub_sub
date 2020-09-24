@@ -31,7 +31,7 @@ defmodule CloudPubSub.Adapter do
   @doc """
   Return whether there is an active connection to AWS IoT Core.
   """
-  def connected?(), do: GenServer.call(__MODULE__, :connected?)
+  def connected?(), do: GenServer.call(__MODULE__, :connected?, 10_000)
 
   @impl GenServer
   def handle_call(:connected?, _from, state) do
