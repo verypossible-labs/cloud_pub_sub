@@ -2,15 +2,18 @@ defmodule CloudPubSub.Adapters.Tortoise.SSL do
   use CloudPubSub.Adapters.Tortoise
 
   def init(opts) do
-    case opts[:cloud_provider] do
-      :aws ->
-        opts[:device_cert] || raise "AWS IoT requires a :device_cert."
-        opts[:device_key] || raise "AWS IoT requires a :device_key."
-        opts[:signer_cert] || raise "AWS IoT requires a :signer_cert."
+    opts =
+      case opts[:cloud_provider] do
+        :aws ->
+          opts[:device_cert] || raise "AWS IoT requires a :device_cert."
+          opts[:device_key] || raise "AWS IoT requires a :device_key."
+          opts[:signer_cert] || raise "AWS IoT requires a :signer_cert."
+          Keyword.put(opts, :ca_certs, [opts[:signer_cert] | opts[:ca_certs]])
 
-      :gcp ->
-        opts[:password] || raise "GCP requires a :password."
-    end
+        :gcp ->
+          opts[:password] || raise "GCP requires a :password."
+          opts
+      end
 
     server_opts = [
       cacerts: opts[:ca_certs],
