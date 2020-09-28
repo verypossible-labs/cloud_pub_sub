@@ -21,6 +21,7 @@ defmodule CloudPubSub.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:mix_test_watch, "~> 1.0"},
       {:tortoise, "~> 0.9"},
       {:x509, "~> 0.8"}
     ]
