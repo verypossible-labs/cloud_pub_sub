@@ -44,6 +44,11 @@ defmodule CloudPubSub.Adapter do
     {:reply, ret, Map.put(state, :adapter_state, adapter_state)}
   end
 
+  def handle_cast({:publish, topic, payload, opts}, _from, state) do
+    {_ret, adapter_state} = state.adapter.publish(topic, payload, opts, state.adapter_state)
+    {:noreply, Map.put(state, :adapter_state, adapter_state)}
+  end
+
   def handle_call({:subscribe, topic, opts}, _from, state) do
     {ret, adapter_state} = state.adapter.subscribe(topic, opts, state.adapter_state)
     {:reply, ret, Map.put(state, :adapter_state, adapter_state)}
@@ -68,6 +73,15 @@ defmodule CloudPubSub.Adapter do
   """
   def publish(topic, payload, opts) do
     GenServer.call(__MODULE__, {:publish, topic, payload, opts})
+  end
+
+  @doc """
+  Attempt to publish to AWS IoT Core.
+  This function is a cast, so usage is asynchronous to the caller and does
+  not return a response. (Not useful for qos > 0)
+  """
+  def publish_cast(topic, payload, opts) do
+    GenServer.cast(__MODULE__, {:publish, topic, payload, opts})
   end
 
   @doc """
