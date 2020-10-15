@@ -34,6 +34,8 @@ defmodule CloudPubSub do
   defdelegate connected?(), to: CloudPubSub.Adapter
 
   defdelegate publish(topic, payload, opts), to: CloudPubSub.Adapter
+  defdelegate publish_cast(topic, payload, opts), to: CloudPubSub.Adapter
+
   defdelegate subscribe(topic, opts \\ []), to: CloudPubSub.Adapter
 
   @doc """
