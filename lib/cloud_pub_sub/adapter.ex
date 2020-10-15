@@ -44,7 +44,7 @@ defmodule CloudPubSub.Adapter do
     {:reply, ret, Map.put(state, :adapter_state, adapter_state)}
   end
 
-  def handle_cast({:publish, topic, payload, opts}, _from, state) do
+  def handle_cast({:publish, topic, payload, opts}, state) do
     {_ret, adapter_state} = state.adapter.publish(topic, payload, opts, state.adapter_state)
     {:noreply, Map.put(state, :adapter_state, adapter_state)}
   end
