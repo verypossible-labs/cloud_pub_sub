@@ -38,10 +38,9 @@ defmodule CloudPubSub.Adapters.Tortoise.SSL do
           )
 
         :gcp ->
-          Keyword.merge(
-            [],
-            server_opts
-          )
+          server_opts
+          |> Keyword.delete(:cert)
+          |> Keyword.delete(:key)
       end
 
     server = {Tortoise.Transport.SSL, server_opts}
