@@ -28,6 +28,9 @@ defmodule CloudPubSub.Adapter do
           ca_certs: [String.t()],
           signer_cert: String.t()
         ]
+
+  @aws_sni "*.iot.us-east-1.amazonaws.com"
+  @gcp_sni nil
   @doc """
   Return whether there is an active connection to AWS IoT Core.
   """
@@ -120,5 +123,9 @@ defmodule CloudPubSub.Adapter do
     |> Keyword.put_new(:port, 443)
     |> Keyword.put_new(:ca_certs, CloudPubSub.ca_certs(opts[:cloud_provider]))
     |> Keyword.put_new(:subscriptions, [])
+    |> Keyword.put_new(:server_name_indication, sni(opts[:cloud_provider]))
   end
+
+  defp sni(:aws), do: @aws_sni
+  defp sni(:gcp), do: @gcp_sni
 end
