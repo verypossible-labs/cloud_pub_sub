@@ -19,6 +19,7 @@ defmodule CloudPubSub.Adapters.Tortoise.SSL do
       cacerts: opts[:ca_certs],
       host: opts[:host],
       partial_chain: &CloudPubSub.SSL.partial_chain(opts[:cloud_provider], &1),
+      customize_hostname_check: [match_fun: :public_key.pkix_verify_hostname_match_fun(:https)],
       port: opts[:port],
       verify: :verify_peer,
       versions: [:"tlsv1.2"],
@@ -31,7 +32,7 @@ defmodule CloudPubSub.Adapters.Tortoise.SSL do
         :aws ->
           Keyword.merge(
             [
-              server_name_indication: "*.iot.us-east-1.amazonaws.com",
+              server_name_indication: opts[:server_name_indication],
               alpn_advertised_protocols: ["x-amzn-mqtt-ca"]
             ],
             server_opts
@@ -41,6 +42,7 @@ defmodule CloudPubSub.Adapters.Tortoise.SSL do
           server_opts
           |> Keyword.delete(:cert)
           |> Keyword.delete(:key)
+          |> Keyword.delete(:server_name_indication)
       end
 
     server = {Tortoise.Transport.SSL, server_opts}
