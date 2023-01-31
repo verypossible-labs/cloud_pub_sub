@@ -3,7 +3,7 @@ defmodule CloudPubSub.Adapters.Tortoise.TCP do
 
   def init(opts) do
     server =
-      {Tortoise.Transport.Tcp,
+      {Tortoise311.Transport.Tcp,
        [
          port: Keyword.fetch!(opts, :port),
          host: Keyword.fetch!(opts, :host)

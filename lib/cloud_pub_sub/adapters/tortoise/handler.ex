@@ -1,5 +1,5 @@
 defmodule CloudPubSub.Adapters.Tortoise.Handler do
-  use Tortoise.Handler
+  use Tortoise311.Handler
 
   require Logger
 

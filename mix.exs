@@ -21,7 +21,7 @@ defmodule CloudPubSub.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:tortoise, "~> 0.9"},
+      {:tortoise311, "~> 0.11"},
       {:x509, "~> 0.8"}
     ]
   end

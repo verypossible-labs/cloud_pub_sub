@@ -45,7 +45,7 @@ defmodule CloudPubSub.Adapters.Tortoise.SSL do
           |> Keyword.delete(:server_name_indication)
       end
 
-    server = {Tortoise.Transport.SSL, server_opts}
+    server = {Tortoise311.Transport.SSL, server_opts}
 
     connection_opts = %{
       cloud_provider: opts[:cloud_provider],

@@ -1,5 +1,6 @@
 %{
   "gen_state_machine": {:hex, :gen_state_machine, "2.0.5", "9ac15ec6e66acac994cc442dcc2c6f9796cf380ec4b08267223014be1c728a95", [:mix], [], "hexpm", "5cacd405e72b2609a7e1f891bddb80c53d0b3b7b0036d1648e7382ca108c41c8"},
-  "tortoise": {:hex, :tortoise, "0.9.4", "3bca5f4475f80a5bd45aab644ddb3364dd0956b67f4202dcef6ed20e045ea3a6", [:mix], [{:gen_state_machine, "~> 2.0", [hex: :gen_state_machine, repo: "hexpm", optional: false]}], "hexpm", "d5c00d7c2329016376181e19f18116a10fc65691bd96b08e5b726ca050d10094"},
+  "telemetry": {:hex, :telemetry, "1.2.1", "68fdfe8d8f05a8428483a97d7aab2f268aaff24b49e0f599faa091f1d4e7f61c", [:rebar3], [], "hexpm", "dad9ce9d8effc621708f99eac538ef1cbe05d6a874dd741de2e689c47feafed5"},
+  "tortoise311": {:hex, :tortoise311, "0.11.5", "4d2850ea123987cfdd9ebdced510977cf37f6c392683d2ab862446fa14c171f3", [:mix], [{:gen_state_machine, "~> 2.0 or ~> 3.0", [hex: :gen_state_machine, repo: "hexpm", optional: false]}, {:telemetry, "~> 1.0", [hex: :telemetry, repo: "hexpm", optional: false]}], "hexpm", "61279fcbdfd1b139020eb3644f94ebdfcdf27a538ee6ba992e4c8bc67b628ba5"},
   "x509": {:hex, :x509, "0.8.0", "b286b9dbb32801f76f48bdea476304d280c64ce172ea330c23d8df7ea9e75ce6", [:mix], [], "hexpm", "8aafaafdcafb1ea9f06bfc32c3b03ccc66f087e0faf36ef94c0195bb7a04157e"},
 }

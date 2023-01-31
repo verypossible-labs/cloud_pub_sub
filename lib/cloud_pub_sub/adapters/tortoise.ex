@@ -5,7 +5,7 @@ defmodule CloudPubSub.Adapters.Tortoise do
 
       @impl CloudPubSub.Adapter
       def connected?(adapter_state) do
-        case Tortoise.Connection.ping_sync(adapter_state.client_id, 5_000) do
+        case Tortoise311.Connection.ping_sync(adapter_state.client_id, 5_000) do
           {:ok, _ref} -> {true, adapter_state}
           {:error, _error} -> {false, adapter_state}
         end
@@ -14,13 +14,15 @@ defmodule CloudPubSub.Adapters.Tortoise do
       @impl CloudPubSub.Adapter
       def publish(topic, payload, opts, adapter_state) do
         opts = if opts == [], do: [qos: 0], else: opts
-        {Tortoise.publish_sync(adapter_state.client_id, topic, payload, opts), adapter_state}
+        {Tortoise311.publish_sync(adapter_state.client_id, topic, payload, opts), adapter_state}
       end
 
       @impl CloudPubSub.Adapter
       def subscribe(topic, opts, adapter_state) do
         opts = if opts == [], do: [qos: 0], else: opts
-        {Tortoise.Connection.subscribe_sync(adapter_state.client_id, topic, opts), adapter_state}
+
+        {Tortoise311.Connection.subscribe_sync(adapter_state.client_id, topic, opts),
+         adapter_state}
       end
     end
   end
@@ -59,6 +61,6 @@ defmodule CloudPubSub.Adapters.Tortoise do
           )
       end
 
-    Tortoise.Connection.start_link(connection_opts)
+    Tortoise311.Connection.start_link(connection_opts)
   end
 end
